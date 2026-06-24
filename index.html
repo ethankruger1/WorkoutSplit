@@ -24,7 +24,6 @@
   button{font-family:inherit; color:inherit; border:none; background:none; cursor:pointer}
   :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
 
-  /* ---------- HOME ---------- */
   .home{padding-top:48px}
   .brand{display:flex; align-items:baseline; gap:10px; margin-bottom:6px}
   .brand h1{font-family:var(--num); font-weight:700; font-size:42px; letter-spacing:.5px; text-transform:uppercase; line-height:.92}
@@ -41,7 +40,6 @@
   .day-card .arrow{font-family:var(--num); font-size:30px; color:var(--accent); font-weight:700}
   .day-card .nm .tick{color:var(--done); font-size:18px; margin-left:8px}
 
-  /* ---------- CONSOLE (day view) ---------- */
   .view-day{display:none}
   body.in-day .home{display:none}
   body.in-day .view-day{display:block}
@@ -71,7 +69,6 @@
   .bar > i{display:block; height:100%; width:0%; background:var(--accent); border-radius:3px; transition:width 1s linear}
   .bar.over > i{background:var(--danger)}
 
-  /* rest strip */
   .rest{display:flex; align-items:center; gap:10px; margin-top:11px; background:var(--surface); border:1px solid var(--line);
     border-radius:var(--r); padding:11px 13px}
   .rest .rclock{font-family:var(--num); font-weight:700; font-variant-numeric:tabular-nums; font-size:34px; line-height:1;
@@ -85,7 +82,6 @@
   .preset:active{transform:scale(.94)}
   .skip{font-family:var(--num); font-weight:600; font-size:15px; color:var(--rest); padding:9px 10px; text-transform:uppercase; letter-spacing:1px}
 
-  /* ---------- EXERCISE LIST ---------- */
   .list{margin-top:16px; display:grid; gap:10px}
   .ex{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); overflow:hidden}
   .ex.done{border-color:rgba(61,220,132,.4)}
@@ -111,6 +107,13 @@
   .set.done .s-mark{color:var(--done)}
   .set.done .s-lbl{color:var(--done)}
 
+  .note-wrap{grid-column:1 / -1; margin-top:4px}
+  .note-input{width:100%; background:var(--surface-2); border:1px solid var(--line); border-radius:9px;
+    color:var(--text); font-family:var(--body); font-size:13px; padding:10px 12px; resize:none; line-height:1.5;
+    -webkit-appearance:none}
+  .note-input::placeholder{color:var(--muted)}
+  .note-input:focus{outline:none; border-color:var(--muted)}
+
   .clear{width:100%; margin-top:18px; padding:16px; border-radius:var(--r); background:transparent; border:1px solid var(--line);
     color:var(--muted); font-family:var(--num); font-weight:600; font-size:16px; text-transform:uppercase; letter-spacing:1.5px}
   .clear:active{border-color:var(--danger); color:var(--danger)}
@@ -123,7 +126,6 @@
 </head>
 <body>
 
-  <!-- HOME -->
   <section class="home">
     <div class="brand"><h1>Lift Console</h1><span class="dot"></span></div>
     <p class="tagline">Upper / Lower split · 60-minute cap · 90s rest</p>
@@ -132,7 +134,6 @@
     <p class="foot">Progress saves on this device until you clear a day.</p>
   </section>
 
-  <!-- DAY VIEW -->
   <section class="view-day">
     <div class="console">
       <div class="topbar">
@@ -140,7 +141,6 @@
         <span class="title" id="dayTitle"></span>
         <span class="setcount"><b id="setsDone">0</b>/<span id="setsTotal">0</span></span>
       </div>
-
       <div class="scoreboard">
         <div class="sb-row">
           <div>
@@ -154,11 +154,10 @@
         </div>
         <div class="bar" id="bar"><i></i></div>
       </div>
-
       <div class="rest idle" id="restWrap">
         <div>
           <span class="rlbl">REST</span>
-          <span class="rclock" id="restClock">0:90</span>
+          <span class="rclock" id="restClock">1:30</span>
         </div>
         <div class="presets" id="presets">
           <button class="preset" data-sec="60">60</button>
@@ -169,7 +168,6 @@
         <button class="skip" id="skipRest">Skip</button>
       </div>
     </div>
-
     <div class="list" id="list"></div>
     <button class="clear" id="clearBtn">Clear this day</button>
     <p class="foot">Tap an exercise to open its sets · checking a set starts your rest</p>
@@ -178,8 +176,6 @@
 <script>
 (function(){
   "use strict";
-
-  /* ---------------- DATA ---------------- */
   var WORKOUTS = {
     upper1: { name:"Upper 1", sub:"Push · Pull · Arms", ex:[
       {n:"Shoulder Press", s:3}, {n:"Lower Lat Row", s:3}, {n:"Machine Row", s:2},
@@ -201,242 +197,83 @@
       {n:"Abductors", s:3}, {n:"Adductors", s:3}, {n:"Calf Raises", s:3}
     ]}
   };
-  var ORDER = ["upper1","lower1","upper2","lower2"];
-  var SESSION = 60*60;
-
-  /* ------------- PERSISTENCE (graceful) ------------- */
-  var mem = {};
-  function load(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return (k in mem)?mem[k]:d; } }
-  function save(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ mem[k]=v; } }
-
-  var progress = load("lc_progress", {});
-  var restPreset = load("lc_rest", 90);
-
-  function dayState(day){
-    if(!progress[day]){
-      progress[day] = WORKOUTS[day].ex.map(function(e){ return new Array(e.s).fill(false); });
-    }
-    return progress[day];
-  }
-
-  /* ---------------- TIMERS ---------------- */
-  var sess = { id:null, remaining:SESSION, running:false };
-  var rest = { id:null, remaining:restPreset, running:false };
-
-  function fmt(sec){
-    var neg = sec<0; sec=Math.abs(sec);
-    var m=Math.floor(sec/60), s=sec%60;
-    return (neg?"+":"")+m+":"+(s<10?"0":"")+s;
-  }
-
-  function tickSession(){
-    sess.remaining--;
-    renderSession();
-    if(sess.remaining===0){ buzz(); }
-  }
-
+  var ORDER=["upper1","lower1","upper2","lower2"], SESSION=60*60;
+  var mem={};
+  function load(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return(k in mem)?mem[k]:d;}}
+  function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){mem[k]=v;}}
+  function remove(k){try{localStorage.removeItem(k);}catch(e){delete mem[k];}}
+  var progress=load("lc_progress",{}), notes=load("lc_notes",{}), restPreset=load("lc_rest",90);
+  function dayState(day){if(!progress[day]){progress[day]=WORKOUTS[day].ex.map(function(e){return new Array(e.s).fill(false);});}return progress[day];}
+  function getNote(day,i){return(notes[day]&&notes[day][i]!=null)?notes[day][i]:"";}
+  function setNote(day,i,text){if(!notes[day])notes[day]={};if(text){notes[day][i]=text;}else{delete notes[day][i];}save("lc_notes",notes);}
+  var sess={id:null,endAt:null,pausedRemaining:SESSION,running:false,buzzed:false};
+  var rest={id:null,endAt:null,running:false};
+  function sessRemaining(){if(sess.running&&sess.endAt)return Math.round((sess.endAt-Date.now())/1000);return sess.pausedRemaining;}
+  function restRemaining(){if(rest.running&&rest.endAt)return Math.max(0,Math.round((rest.endAt-Date.now())/1000));return restPreset;}
+  function fmt(sec){var neg=sec<0;sec=Math.abs(sec);var m=Math.floor(sec/60),s=sec%60;return(neg?"+":"")+m+":"+(s<10?"0":"")+s;}
+  function tickSession(){renderSession();if(sessRemaining()<=0&&!sess.buzzed){sess.buzzed=true;buzz();}}
   function renderSession(){
-    var c=document.getElementById("clock"), bar=document.getElementById("bar");
-    c.textContent=fmt(sess.remaining);
-    c.classList.toggle("over", sess.remaining<0);
-    c.classList.toggle("warn", sess.remaining>=0 && sess.remaining<=300);
-    var used=SESSION-sess.remaining;
-    var pct=Math.min(100, Math.max(0,(used/SESSION)*100));
-    bar.firstElementChild.style.width=pct+"%";
-    bar.classList.toggle("over", sess.remaining<0);
+    var rem=sessRemaining(),c=document.getElementById("clock"),bar=document.getElementById("bar");
+    c.textContent=fmt(rem);c.classList.toggle("over",rem<0);c.classList.toggle("warn",rem>=0&&rem<=300);
+    bar.firstElementChild.style.width=Math.min(100,Math.max(0,((SESSION-rem)/SESSION)*100))+"%";
+    bar.classList.toggle("over",rem<0);
   }
-
   function startSession(){
-    if(sess.running){
-      clearInterval(sess.id);
-      sess.id=null;
-      sess.running=false;
-      document.getElementById("startBtn").textContent="Resume";
-      return;
-    }
-    sess.running=true;
-    document.getElementById("startBtn").textContent="Pause";
-    sess.id=setInterval(tickSession,1000);
+    if(sess.running){sess.pausedRemaining=sessRemaining();clearInterval(sess.id);sess.id=null;sess.running=false;sess.endAt=null;saveSessState();document.getElementById("startBtn").textContent="Resume";return;}
+    sess.endAt=Date.now()+sess.pausedRemaining*1000;sess.running=true;saveSessState();
+    document.getElementById("startBtn").textContent="Pause";sess.id=setInterval(tickSession,500);
   }
-
-  function resetSession(){
-    clearInterval(sess.id);
-    sess.id=null;
-    sess.running=false;
-    sess.remaining=SESSION;
-    document.getElementById("startBtn").textContent="Start";
-    renderSession();
-  }
-
-  function renderRest(){
-    var rc=document.getElementById("restClock");
-    var wrap=document.getElementById("restWrap");
-    rc.textContent=fmt(rest.remaining);
-    wrap.classList.toggle("idle", !rest.running);
-  }
-
-  function startRest(){
-    clearInterval(rest.id);
-    rest.remaining=restPreset;
-    rest.running=true;
-    renderRest();
-    rest.id=setInterval(function(){
-      rest.remaining--;
-      if(rest.remaining<=0){
-        clearInterval(rest.id);
-        rest.id=null;
-        rest.running=false;
-        rest.remaining=0;
-        renderRest();
-        buzz();
-        rest.remaining=restPreset;
-        setTimeout(renderRest,900);
-        return;
-      }
-      renderRest();
-    },1000);
-  }
-
-  function skipRest(){
-    clearInterval(rest.id);
-    rest.id=null;
-    rest.running=false;
-    rest.remaining=restPreset;
-    renderRest();
-  }
-
+  function resetSession(){clearInterval(sess.id);sess.id=null;sess.running=false;sess.endAt=null;sess.pausedRemaining=SESSION;sess.buzzed=false;remove("lc_sess");document.getElementById("startBtn").textContent="Start";renderSession();}
+  function saveSessState(){save("lc_sess",{running:sess.running,endAt:sess.endAt,pausedRemaining:sess.pausedRemaining});}
+  function tickRest(){var rem=restRemaining();renderRest();if(rem<=0){clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;remove("lc_rest_end");buzz();setTimeout(renderRest,900);}}
+  function renderRest(){var rem=rest.running?restRemaining():restPreset;document.getElementById("restClock").textContent=fmt(rem);document.getElementById("restWrap").classList.toggle("idle",!rest.running);}
+  function startRest(){clearInterval(rest.id);rest.endAt=Date.now()+restPreset*1000;rest.running=true;save("lc_rest_end",rest.endAt);renderRest();rest.id=setInterval(tickRest,500);}
+  function skipRest(){clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;remove("lc_rest_end");renderRest();}
   function buzz(){
-    if(navigator.vibrate){ try{ navigator.vibrate([220,90,220]); }catch(e){} }
-    try{
-      var Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx) return;
-      var ac=new Ctx(); var o=ac.createOscillator(), g=ac.createGain();
-      o.connect(g); g.connect(ac.destination); o.type="sine"; o.frequency.value=880;
-      g.gain.setValueAtTime(.001,ac.currentTime);
-      g.gain.exponentialRampToValueAtTime(.4,ac.currentTime+.02);
-      g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.5);
-      o.start(); o.stop(ac.currentTime+.5);
-    }catch(e){}
+    if(navigator.vibrate){try{navigator.vibrate([220,90,220]);}catch(e){}}
+    try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;var ac=new Ctx(),o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type="sine";o.frequency.value=880;g.gain.setValueAtTime(.001,ac.currentTime);g.gain.exponentialRampToValueAtTime(.4,ac.currentTime+.02);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.5);o.start();o.stop(ac.currentTime+.5);}catch(e){}
   }
-
-  /* ---------------- RENDER HOME ---------------- */
-  function dayCounts(day){
-    var st=dayState(day), done=0, total=0;
-    st.forEach(function(arr){ arr.forEach(function(b){ total++; if(b)done++; }); });
-    return {done:done,total:total};
-  }
-
+  function dayCounts(day){var st=dayState(day),done=0,total=0;st.forEach(function(arr){arr.forEach(function(b){total++;if(b)done++;});});return{done:done,total:total};}
   function renderHome(){
-    var wrap=document.getElementById("days"); wrap.innerHTML="";
-    ORDER.forEach(function(day){
-      var w=WORKOUTS[day], c=dayCounts(day);
-      var complete = c.done===c.total && c.total>0;
-      var b=document.createElement("button");
-      b.className="day-card"; b.setAttribute("aria-label","Open "+w.name);
-      b.innerHTML='<span class="meta"><span class="nm">'+w.name+(complete?'<span class="tick">✓</span>':'')+
-        '</span><span class="sub">'+w.sub+' · '+c.done+'/'+c.total+' sets</span></span><span class="arrow">›</span>';
-      b.addEventListener("click",function(){ openDay(day); });
-      wrap.appendChild(b);
-    });
+    var wrap=document.getElementById("days");wrap.innerHTML="";
+    ORDER.forEach(function(day){var w=WORKOUTS[day],c=dayCounts(day),complete=c.done===c.total&&c.total>0;var b=document.createElement("button");b.className="day-card";b.setAttribute("aria-label","Open "+w.name);b.innerHTML='<span class="meta"><span class="nm">'+w.name+(complete?'<span class="tick">✓</span>':'')+' </span><span class="sub">'+w.sub+' · '+c.done+'/'+c.total+' sets</span></span><span class="arrow">›</span>';b.addEventListener("click",function(){openDay(day);});wrap.appendChild(b);});
   }
-
-  /* ---------------- RENDER DAY ---------------- */
   var current=null;
-
-  function setCounts(){
-    var c=dayCounts(current);
-    document.getElementById("setsDone").textContent=c.done;
-    document.getElementById("setsTotal").textContent=c.total;
-  }
-
+  function setCounts(){var c=dayCounts(current);document.getElementById("setsDone").textContent=c.done;document.getElementById("setsTotal").textContent=c.total;}
   function renderList(){
-    var list=document.getElementById("list"); list.innerHTML="";
-    var st=dayState(current), defs=WORKOUTS[current].ex;
+    var list=document.getElementById("list");list.innerHTML="";
+    var st=dayState(current),defs=WORKOUTS[current].ex;
     defs.forEach(function(e,i){
-      var arr=st[i], done=arr.filter(Boolean).length;
-      var ex=document.createElement("div");
-      ex.className="ex"+(done===e.s?" done":"");
-      ex.dataset.i=i;
-
-      var head=document.createElement("button");
-      head.className="ex-head"; head.setAttribute("aria-expanded","false");
-      head.innerHTML='<span class="idx">'+(i+1)+'</span>'+
-        '<span class="name">'+e.n+(e.opt?'<span class="opt">optional</span>':'')+' </span>'+
-        '<span class="count">'+done+'/'+e.s+'</span><span class="chev">›</span>';
-      head.addEventListener("click",function(){
-        var open=ex.classList.toggle("open");
-        head.setAttribute("aria-expanded", open?"true":"false");
-      });
-
-      var body=document.createElement("div"); body.className="ex-body";
-      for(var s=0;s<e.s;s++){
-        (function(sIdx){
-          var btn=document.createElement("button");
-          btn.className="set"+(arr[sIdx]?" done":"");
-          btn.innerHTML='<span class="s-lbl">Set '+(sIdx+1)+'</span><span class="s-mark">'+(arr[sIdx]?'✓':'○')+'</span>';
-          btn.addEventListener("click",function(){
-            arr[sIdx]=!arr[sIdx];
-            save("lc_progress", progress);
-            btn.classList.toggle("done", arr[sIdx]);
-            btn.querySelector(".s-mark").textContent=arr[sIdx]?'✓':'○';
-            var nDone=arr.filter(Boolean).length;
-            head.querySelector(".count").textContent=nDone+'/'+e.s;
-            ex.classList.toggle("done", nDone===e.s);
-            head.querySelector(".idx").textContent=(i+1);
-            setCounts();
-            if(arr[sIdx]) startRest();
-          });
-          body.appendChild(btn);
-        })(s);
-      }
-
-      ex.appendChild(head); ex.appendChild(body);
-      list.appendChild(ex);
+      var arr=st[i],done=arr.filter(Boolean).length;
+      var ex=document.createElement("div");ex.className="ex"+(done===e.s?" done":"");
+      var head=document.createElement("button");head.className="ex-head";head.setAttribute("aria-expanded","false");
+      head.innerHTML='<span class="idx">'+(i+1)+'</span><span class="name">'+e.n+(e.opt?'<span class="opt">optional</span>':'')+' </span><span class="count">'+done+'/'+e.s+'</span><span class="chev">›</span>';
+      head.addEventListener("click",function(){var open=ex.classList.toggle("open");head.setAttribute("aria-expanded",open?"true":"false");});
+      var body=document.createElement("div");body.className="ex-body";
+      for(var s=0;s<e.s;s++){(function(sIdx){var btn=document.createElement("button");btn.className="set"+(arr[sIdx]?" done":"");btn.innerHTML='<span class="s-lbl">Set '+(sIdx+1)+'</span><span class="s-mark">'+(arr[sIdx]?'✓':'○')+'</span>';btn.addEventListener("click",function(){arr[sIdx]=!arr[sIdx];save("lc_progress",progress);btn.classList.toggle("done",arr[sIdx]);btn.querySelector(".s-mark").textContent=arr[sIdx]?'✓':'○';var nDone=arr.filter(Boolean).length;head.querySelector(".count").textContent=nDone+'/'+e.s;ex.classList.toggle("done",nDone===e.s);setCounts();if(arr[sIdx])startRest();});body.appendChild(btn);})(s);}
+      (function(exIdx){var nw=document.createElement("div");nw.className="note-wrap";var ta=document.createElement("textarea");ta.className="note-input";ta.placeholder="Notes...";ta.rows=2;ta.value=getNote(current,exIdx);ta.addEventListener("input",function(){setNote(current,exIdx,ta.value);});ta.addEventListener("click",function(ev){ev.stopPropagation();});nw.appendChild(ta);body.appendChild(nw);})(i);
+      ex.appendChild(head);ex.appendChild(body);list.appendChild(ex);
     });
   }
-
-  function openDay(day){
-    current=day;
-    document.body.classList.add("in-day");
-    document.getElementById("dayTitle").textContent=WORKOUTS[day].name;
-    resetSession(); skipRest(); renderRest();
-    renderList(); setCounts();
-    window.scrollTo(0,0);
-  }
-
-  function goHome(){
-    document.body.classList.remove("in-day");
-    clearInterval(sess.id); sess.id=null; sess.running=false;
-    clearInterval(rest.id); rest.id=null; rest.running=false;
-    current=null; renderHome();
-  }
-
-  function clearDay(){
-    if(!current) return;
-    if(!confirm("Clear all sets for "+WORKOUTS[current].name+"?")) return;
-    progress[current]=WORKOUTS[current].ex.map(function(e){ return new Array(e.s).fill(false); });
-    save("lc_progress", progress);
-    resetSession(); skipRest();
-    renderList(); setCounts();
-  }
-
-  /* ---------------- WIRE UP ---------------- */
-  document.getElementById("startBtn").addEventListener("click", startSession);
-  document.getElementById("resetBtn").addEventListener("click", resetSession);
-  document.getElementById("back").addEventListener("click", goHome);
-  document.getElementById("clearBtn").addEventListener("click", clearDay);
-  document.getElementById("skipRest").addEventListener("click", skipRest);
-  document.getElementById("presets").addEventListener("click", function(ev){
-    var b=ev.target.closest(".preset"); if(!b) return;
-    restPreset=parseInt(b.dataset.sec,10); save("lc_rest", restPreset);
-    document.querySelectorAll(".preset").forEach(function(p){ p.classList.toggle("sel", p===b); });
-    if(!rest.running){ rest.remaining=restPreset; renderRest(); }
-  });
-
-  document.querySelectorAll(".preset").forEach(function(p){
-    p.classList.toggle("sel", parseInt(p.dataset.sec,10)===restPreset);
-  });
-  rest.remaining=restPreset; renderRest();
-  renderHome();
+  function openDay(day,keepTimers){current=day;save("lc_current",day);document.body.classList.add("in-day");document.getElementById("dayTitle").textContent=WORKOUTS[day].name;if(!keepTimers){resetSession();skipRest();}renderList();setCounts();window.scrollTo(0,0);}
+  function goHome(){document.body.classList.remove("in-day");clearInterval(sess.id);sess.id=null;sess.running=false;clearInterval(rest.id);rest.id=null;rest.running=false;remove("lc_current");remove("lc_sess");remove("lc_rest_end");current=null;renderHome();}
+  function clearDay(){if(!current)return;if(!confirm("Clear all sets for "+WORKOUTS[current].name+"?"))return;progress[current]=WORKOUTS[current].ex.map(function(e){return new Array(e.s).fill(false);});save("lc_progress",progress);resetSession();skipRest();renderList();setCounts();}
+  document.getElementById("startBtn").addEventListener("click",startSession);
+  document.getElementById("resetBtn").addEventListener("click",resetSession);
+  document.getElementById("back").addEventListener("click",goHome);
+  document.getElementById("clearBtn").addEventListener("click",clearDay);
+  document.getElementById("skipRest").addEventListener("click",skipRest);
+  document.getElementById("presets").addEventListener("click",function(ev){var b=ev.target.closest(".preset");if(!b)return;restPreset=parseInt(b.dataset.sec,10);save("lc_rest",restPreset);document.querySelectorAll(".preset").forEach(function(p){p.classList.toggle("sel",p===b);});if(!rest.running){renderRest();}});
+  var savedCurrent=load("lc_current",null),savedSess=load("lc_sess",null),savedRestEnd=load("lc_rest_end",null);
+  document.querySelectorAll(".preset").forEach(function(p){p.classList.toggle("sel",parseInt(p.dataset.sec,10)===restPreset);});
+  if(savedCurrent&&WORKOUTS[savedCurrent]){
+    openDay(savedCurrent,true);
+    if(savedSess){if(savedSess.running&&savedSess.endAt){sess.endAt=savedSess.endAt;sess.pausedRemaining=Math.round((savedSess.endAt-Date.now())/1000);sess.buzzed=sess.pausedRemaining<=0;sess.running=true;document.getElementById("startBtn").textContent="Pause";sess.id=setInterval(tickSession,500);}else if(savedSess.pausedRemaining!=null){sess.pausedRemaining=savedSess.pausedRemaining;if(savedSess.pausedRemaining<SESSION){document.getElementById("startBtn").textContent="Resume";}}}
+    renderSession();
+    if(savedRestEnd){var rl=Math.round((savedRestEnd-Date.now())/1000);if(rl>0){rest.endAt=savedRestEnd;rest.running=true;rest.id=setInterval(tickRest,500);}else{remove("lc_rest_end");}}
+    renderRest();
+  } else { renderRest(); renderHome(); }
+  document.addEventListener("visibilitychange",function(){if(!document.hidden){renderSession();if(rest.running&&restRemaining()<=0){clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;remove("lc_rest_end");}renderRest();}});
 })();
 </script>
 </body>
