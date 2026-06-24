@@ -111,6 +111,14 @@
   .set.done .s-mark{color:var(--done)}
   .set.done .s-lbl{color:var(--done)}
 
+  /* notes */
+  .note-wrap{grid-column:1 / -1; margin-top:4px}
+  .note-input{width:100%; background:var(--surface-2); border:1px solid var(--line); border-radius:9px;
+    color:var(--text); font-family:var(--body); font-size:13px; padding:10px 12px; resize:none; line-height:1.5;
+    -webkit-appearance:none}
+  .note-input::placeholder{color:var(--muted)}
+  .note-input:focus{outline:none; border-color:var(--muted)}
+
   .clear{width:100%; margin-top:18px; padding:16px; border-radius:var(--r); background:transparent; border:1px solid var(--line);
     color:var(--muted); font-family:var(--num); font-weight:600; font-size:16px; text-transform:uppercase; letter-spacing:1.5px}
   .clear:active{border-color:var(--danger); color:var(--danger)}
@@ -158,7 +166,7 @@
       <div class="rest idle" id="restWrap">
         <div>
           <span class="rlbl">REST</span>
-          <span class="rclock" id="restClock">0:90</span>
+          <span class="rclock" id="restClock">1:30</span>
         </div>
         <div class="presets" id="presets">
           <button class="preset" data-sec="60">60</button>
@@ -202,14 +210,16 @@
     ]}
   };
   var ORDER = ["upper1","lower1","upper2","lower2"];
-  var SESSION = 60*60; // seconds
+  var SESSION = 60*60;
 
-  /* ------------- PERSISTENCE (graceful) ------------- */
+  /* ------------- PERSISTENCE ------------- */
   var mem = {};
   function load(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return (k in mem)?mem[k]:d; } }
   function save(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ mem[k]=v; } }
+  function remove(k){ try{ localStorage.removeItem(k); }catch(e){ delete mem[k]; } }
 
   var progress = load("lc_progress", {});
+  var notes    = load("lc_notes", {});
   var restPreset = load("lc_rest", 90);
 
   function dayState(day){
@@ -219,90 +229,103 @@
     return progress[day];
   }
 
-  /* ---------------- TIMERS ---------------- */
-  var sess = { id:null, remaining:SESSION, running:false };
-  var rest = { id:null, remaining:restPreset, running:false };
+  function getNote(day, i){ return (notes[day] && notes[day][i] != null) ? notes[day][i] : ""; }
+  function setNote(day, i, text){
+    if(!notes[day]) notes[day]={};
+    if(text){ notes[day][i]=text; } else { delete notes[day][i]; }
+    save("lc_notes", notes);
+  }
+
+  /* ---------------- TIMERS ----------------
+     Both timers are deadline-based: we store an absolute end timestamp
+     (Date.now() + remaining_ms) so background suspension doesn't cause drift.
+     On page reload (iOS PWA), we restore from localStorage.
+  ------------------------------------------------- */
+  var sess = { id:null, endAt:null, pausedRemaining:SESSION, running:false, buzzed:false };
+  var rest = { id:null, endAt:null, running:false };
+
+  function sessRemaining(){
+    if(sess.running && sess.endAt) return Math.round((sess.endAt - Date.now()) / 1000);
+    return sess.pausedRemaining;
+  }
+  function restRemaining(){
+    if(rest.running && rest.endAt) return Math.max(0, Math.round((rest.endAt - Date.now()) / 1000));
+    return restPreset;
+  }
 
   function fmt(sec){
-    var neg = sec<0; sec=Math.abs(sec);
+    var neg=sec<0; sec=Math.abs(sec);
     var m=Math.floor(sec/60), s=sec%60;
     return (neg?"+":"")+m+":"+(s<10?"0":"")+s;
   }
 
+  /* --- session --- */
   function tickSession(){
-    sess.remaining--;
     renderSession();
-    if(sess.remaining===0){ buzz(); }
+    if(sessRemaining()<=0 && !sess.buzzed){ sess.buzzed=true; buzz(); }
   }
-
   function renderSession(){
+    var rem=sessRemaining();
     var c=document.getElementById("clock"), bar=document.getElementById("bar");
-    c.textContent=fmt(sess.remaining);
-    c.classList.toggle("over", sess.remaining<0);
-    c.classList.toggle("warn", sess.remaining>=0 && sess.remaining<=300);
-    var used=SESSION-sess.remaining;
-    var pct=Math.min(100, Math.max(0,(used/SESSION)*100));
-    bar.firstElementChild.style.width=pct+"%";
-    bar.classList.toggle("over", sess.remaining<0);
+    c.textContent=fmt(rem);
+    c.classList.toggle("over", rem<0);
+    c.classList.toggle("warn", rem>=0 && rem<=300);
+    var used=SESSION-rem;
+    bar.firstElementChild.style.width=Math.min(100,Math.max(0,(used/SESSION)*100))+"%";
+    bar.classList.toggle("over", rem<0);
   }
-
   function startSession(){
     if(sess.running){
-      // pause
-      clearInterval(sess.id);
-      sess.id=null;
-      sess.running=false;
+      sess.pausedRemaining=sessRemaining();
+      clearInterval(sess.id); sess.id=null; sess.running=false; sess.endAt=null;
+      saveSessState();
       document.getElementById("startBtn").textContent="Resume";
       return;
     }
+    sess.endAt=Date.now()+sess.pausedRemaining*1000;
     sess.running=true;
+    saveSessState();
     document.getElementById("startBtn").textContent="Pause";
-    sess.id=setInterval(tickSession,1000);
+    sess.id=setInterval(tickSession,500);
   }
-
   function resetSession(){
-    clearInterval(sess.id);
-    sess.id=null;
-    sess.running=false;
-    sess.remaining=SESSION;
+    clearInterval(sess.id); sess.id=null;
+    sess.running=false; sess.endAt=null; sess.pausedRemaining=SESSION; sess.buzzed=false;
+    remove("lc_sess");
     document.getElementById("startBtn").textContent="Start";
     renderSession();
   }
-
-  function renderRest(){
-    var rc=document.getElementById("restClock");
-    var wrap=document.getElementById("restWrap");
-    rc.textContent=fmt(rest.remaining);
-    wrap.classList.toggle("idle", !rest.running);
+  function saveSessState(){
+    save("lc_sess",{running:sess.running, endAt:sess.endAt, pausedRemaining:sess.pausedRemaining});
   }
 
+  /* --- rest --- */
+  function tickRest(){
+    var rem=restRemaining();
+    renderRest();
+    if(rem<=0){
+      clearInterval(rest.id); rest.id=null; rest.running=false; rest.endAt=null;
+      remove("lc_rest_end");
+      buzz();
+      setTimeout(renderRest,900);
+    }
+  }
+  function renderRest(){
+    var rem=rest.running ? restRemaining() : restPreset;
+    document.getElementById("restClock").textContent=fmt(rem);
+    document.getElementById("restWrap").classList.toggle("idle", !rest.running);
+  }
   function startRest(){
     clearInterval(rest.id);
-    rest.remaining=restPreset;
+    rest.endAt=Date.now()+restPreset*1000;
     rest.running=true;
+    save("lc_rest_end", rest.endAt);
     renderRest();
-    rest.id=setInterval(function(){
-      rest.remaining--;
-      if(rest.remaining<=0){
-        clearInterval(rest.id);
-        rest.id=null;
-        rest.running=false;
-        rest.remaining=0;
-        renderRest();
-        buzz();
-        rest.remaining=restPreset;
-        setTimeout(renderRest,900);
-        return;
-      }
-      renderRest();
-    },1000);
+    rest.id=setInterval(tickRest,500);
   }
-
   function skipRest(){
-    clearInterval(rest.id);
-    rest.id=null;
-    rest.running=false;
-    rest.remaining=restPreset;
+    clearInterval(rest.id); rest.id=null; rest.running=false; rest.endAt=null;
+    remove("lc_rest_end");
     renderRest();
   }
 
@@ -310,7 +333,7 @@
     if(navigator.vibrate){ try{ navigator.vibrate([220,90,220]); }catch(e){} }
     try{
       var Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx) return;
-      var ac=new Ctx(); var o=ac.createOscillator(), g=ac.createGain();
+      var ac=new Ctx(), o=ac.createOscillator(), g=ac.createGain();
       o.connect(g); g.connect(ac.destination); o.type="sine"; o.frequency.value=880;
       g.gain.setValueAtTime(.001,ac.currentTime);
       g.gain.exponentialRampToValueAtTime(.4,ac.currentTime+.02);
@@ -319,18 +342,17 @@
     }catch(e){}
   }
 
-  /* ---------------- RENDER HOME ---------------- */
+  /* ---------------- HOME ---------------- */
   function dayCounts(day){
     var st=dayState(day), done=0, total=0;
     st.forEach(function(arr){ arr.forEach(function(b){ total++; if(b)done++; }); });
     return {done:done,total:total};
   }
-
   function renderHome(){
     var wrap=document.getElementById("days"); wrap.innerHTML="";
     ORDER.forEach(function(day){
       var w=WORKOUTS[day], c=dayCounts(day);
-      var complete = c.done===c.total && c.total>0;
+      var complete=c.done===c.total && c.total>0;
       var b=document.createElement("button");
       b.className="day-card"; b.setAttribute("aria-label","Open "+w.name);
       b.innerHTML='<span class="meta"><span class="nm">'+w.name+(complete?'<span class="tick">✓</span>':'')+
@@ -340,7 +362,7 @@
     });
   }
 
-  /* ---------------- RENDER DAY ---------------- */
+  /* ---------------- DAY VIEW ---------------- */
   var current=null;
 
   function setCounts(){
@@ -356,7 +378,6 @@
       var arr=st[i], done=arr.filter(Boolean).length;
       var ex=document.createElement("div");
       ex.className="ex"+(done===e.s?" done":"");
-      ex.dataset.i=i;
 
       var head=document.createElement("button");
       head.className="ex-head"; head.setAttribute("aria-expanded","false");
@@ -369,6 +390,7 @@
       });
 
       var body=document.createElement("div"); body.className="ex-body";
+
       for(var s=0;s<e.s;s++){
         (function(sIdx){
           var btn=document.createElement("button");
@@ -382,7 +404,6 @@
             var nDone=arr.filter(Boolean).length;
             head.querySelector(".count").textContent=nDone+'/'+e.s;
             ex.classList.toggle("done", nDone===e.s);
-            head.querySelector(".idx").textContent=(i+1);
             setCounts();
             if(arr[sIdx]) startRest();
           });
@@ -390,16 +411,32 @@
         })(s);
       }
 
+      // Notes field — persists independently, never cleared by Clear Day
+      (function(exIdx){
+        var noteWrap=document.createElement("div");
+        noteWrap.className="note-wrap";
+        var ta=document.createElement("textarea");
+        ta.className="note-input";
+        ta.placeholder="Notes...";
+        ta.rows=2;
+        ta.value=getNote(current, exIdx);
+        ta.addEventListener("input",function(){ setNote(current, exIdx, ta.value); });
+        ta.addEventListener("click",function(ev){ ev.stopPropagation(); });
+        noteWrap.appendChild(ta);
+        body.appendChild(noteWrap);
+      })(i);
+
       ex.appendChild(head); ex.appendChild(body);
       list.appendChild(ex);
     });
   }
 
-  function openDay(day){
+  function openDay(day, keepTimers){
     current=day;
+    save("lc_current", day);
     document.body.classList.add("in-day");
     document.getElementById("dayTitle").textContent=WORKOUTS[day].name;
-    resetSession(); skipRest(); renderRest();
+    if(!keepTimers){ resetSession(); skipRest(); }
     renderList(); setCounts();
     window.scrollTo(0,0);
   }
@@ -408,6 +445,7 @@
     document.body.classList.remove("in-day");
     clearInterval(sess.id); sess.id=null; sess.running=false;
     clearInterval(rest.id); rest.id=null; rest.running=false;
+    remove("lc_current"); remove("lc_sess"); remove("lc_rest_end");
     current=null; renderHome();
   }
 
@@ -418,6 +456,7 @@
     save("lc_progress", progress);
     resetSession(); skipRest();
     renderList(); setCounts();
+    // notes are intentionally preserved
   }
 
   /* ---------------- WIRE UP ---------------- */
@@ -430,15 +469,71 @@
     var b=ev.target.closest(".preset"); if(!b) return;
     restPreset=parseInt(b.dataset.sec,10); save("lc_rest", restPreset);
     document.querySelectorAll(".preset").forEach(function(p){ p.classList.toggle("sel", p===b); });
-    if(!rest.running){ rest.remaining=restPreset; renderRest(); }
+    if(!rest.running){ renderRest(); }
   });
 
-  // init rest preset selection from saved value
+  /* ---------------- RESTORE STATE ON LOAD ----------------
+     iOS PWA reloads the page when returning after a long background.
+     We save enough state to resume exactly where we left off.
+  ------------------------------------------------- */
+  var savedCurrent  = load("lc_current", null);
+  var savedSess     = load("lc_sess", null);
+  var savedRestEnd  = load("lc_rest_end", null);
+
+  // init preset highlight
   document.querySelectorAll(".preset").forEach(function(p){
     p.classList.toggle("sel", parseInt(p.dataset.sec,10)===restPreset);
   });
-  rest.remaining=restPreset; renderRest();
-  renderHome();
+
+  if(savedCurrent && WORKOUTS[savedCurrent]){
+    openDay(savedCurrent, true); // keepTimers=true, don't reset
+
+    // Restore session timer
+    if(savedSess){
+      if(savedSess.running && savedSess.endAt){
+        sess.endAt=savedSess.endAt;
+        sess.pausedRemaining=Math.round((savedSess.endAt-Date.now())/1000);
+        sess.buzzed=sess.pausedRemaining<=0; // already past end, don't buzz again
+        sess.running=true;
+        document.getElementById("startBtn").textContent="Pause";
+        sess.id=setInterval(tickSession,500);
+      } else if(savedSess.pausedRemaining!=null){
+        sess.pausedRemaining=savedSess.pausedRemaining;
+        if(savedSess.pausedRemaining<SESSION){
+          document.getElementById("startBtn").textContent="Resume";
+        }
+      }
+    }
+    renderSession();
+
+    // Restore rest timer
+    if(savedRestEnd){
+      var restLeft=Math.round((savedRestEnd-Date.now())/1000);
+      if(restLeft>0){
+        rest.endAt=savedRestEnd; rest.running=true;
+        rest.id=setInterval(tickRest,500);
+      } else {
+        remove("lc_rest_end");
+      }
+    }
+    renderRest();
+  } else {
+    renderRest();
+    renderHome();
+  }
+
+  // Recalculate display immediately when returning to tab/app without full reload
+  document.addEventListener("visibilitychange", function(){
+    if(!document.hidden){
+      renderSession();
+      if(rest.running && restRemaining()<=0){
+        clearInterval(rest.id); rest.id=null; rest.running=false; rest.endAt=null;
+        remove("lc_rest_end");
+      }
+      renderRest();
+    }
+  });
+
 })();
 </script>
 </body>
