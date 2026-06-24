@@ -201,7 +201,7 @@
     ]}
   };
   var ORDER = ["upper1","lower1","upper2","lower2"];
-  var SESSION = 60*60; // seconds
+  var SESSION = 60*60;
 
   /* ------------- PERSISTENCE (graceful) ------------- */
   var mem = {};
@@ -247,7 +247,6 @@
 
   function startSession(){
     if(sess.running){
-      // pause
       clearInterval(sess.id);
       sess.id=null;
       sess.running=false;
@@ -360,7 +359,7 @@
       var head=document.createElement("button");
       head.className="ex-head"; head.setAttribute("aria-expanded","false");
       head.innerHTML='<span class="idx">'+(i+1)+'</span>'+
-        '<span class="name">'+e.n+(e.opt?'<span class="opt">optional</span>':'')+'</span>'+
+        '<span class="name">'+e.n+(e.opt?'<span class="opt">optional</span>':'')+' </span>'+
         '<span class="count">'+done+'/'+e.s+'</span><span class="chev">›</span>';
       head.addEventListener("click",function(){
         var open=ex.classList.toggle("open");
@@ -432,7 +431,6 @@
     if(!rest.running){ rest.remaining=restPreset; renderRest(); }
   });
 
-  // init rest preset selection from saved value
   document.querySelectorAll(".preset").forEach(function(p){
     p.classList.toggle("sel", parseInt(p.dataset.sec,10)===restPreset);
   });
