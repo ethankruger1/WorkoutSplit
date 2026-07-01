@@ -254,7 +254,7 @@
     <span class="bc bc-bl"></span><span class="bc bc-br"></span>
     <span class="brand-title">LIFT CONSOLE</span>
     <span class="brand-ver">// TRAINING LOG v2.0</span>
-    <span class="brand-sub">UPPER / LOWER SPLIT PROGRAM</span>
+    <span class="brand-sub">ARNOLD SPLIT · 6 DAY PROGRAM</span>
   </div>
   <p class="sec-lbl">Select session</p>
   <div class="days" id="days"></div>
@@ -316,27 +316,36 @@
 
   /* ── DATA ── */
   var WORKOUTS = {
-    upper1:{name:"UPPER 1",sub:"PUSH · PULL · ARMS",ex:[
-      {n:"Shoulder Press",s:3},{n:"Lower Lat Row",s:3},{n:"Machine Row",s:2},
-      {n:"Pec Dec",s:3},{n:"Rear Delt Fly",s:3},{n:"Skull Crushers",s:3},
-      {n:"Overhead Extension",s:3},{n:"Bicep Curl",s:3},{n:"Preacher Curl",s:3},
+    chest_back_1:{name:"CHEST + BACK",sub:"PUSH · PULL",ex:[
+      {n:"Bench Press",s:4},{n:"Incline Press",s:3},{n:"Pec Dec",s:3},
+      {n:"Bent Over Row",s:4},{n:"Lat Pulldown",s:3},{n:"Seated Cable Row",s:3},
       {n:"Ab Crunch",s:3,opt:true}
     ]},
-    lower1:{name:"LOWER 1",sub:"POSTERIOR · GLUTES",ex:[
-      {n:"Smith Split Squat",s:3},{n:"SLDL",s:3},{n:"Hip Thrust",s:3},
-      {n:"Hamstring Curl",s:3},{n:"Standing Calf Raise",s:3},{n:"Ab Crunch",s:3,opt:true}
+    shoulders_arms_1:{name:"SHOULDERS + ARMS",sub:"DELTS · BICEPS · TRICEPS",ex:[
+      {n:"Overhead Press",s:4},{n:"Lateral Raise",s:3},{n:"Rear Delt Fly",s:3},
+      {n:"Barbell Curl",s:3},{n:"Incline Curl",s:3},
+      {n:"Tricep Pushdown",s:3},{n:"Skull Crushers",s:3}
     ]},
-    upper2:{name:"UPPER 2",sub:"PUSH · PULL · ARMS",ex:[
-      {n:"Flat Chest Press",s:3},{n:"Incline Press",s:3},{n:"Lat Pulldown",s:3},
-      {n:"Machine Row",s:2},{n:"Lat Raise",s:3},{n:"Tricep Pushdown",s:3},
-      {n:"Overhead Cable Ext",s:3},{n:"Bicep Curl",s:3},{n:"Machine Curl",s:3}
+    legs_1:{name:"LEGS",sub:"QUADS · HAMS · CALVES",ex:[
+      {n:"Squat",s:4},{n:"Leg Press",s:3},{n:"Leg Extension",s:3},
+      {n:"Leg Curl",s:3},{n:"Standing Calf Raise",s:4},{n:"Seated Calf Raise",s:3}
     ]},
-    lower2:{name:"LOWER 2",sub:"QUADS · ACCESSORIES",ex:[
-      {n:"Leg Press",s:3},{n:"Leg Extension",s:3},{n:"Seated Leg Curl",s:3},
-      {n:"Abductors",s:3},{n:"Adductors",s:3},{n:"Calf Raises",s:3}
+    chest_back_2:{name:"CHEST + BACK",sub:"PUSH · PULL",ex:[
+      {n:"Bench Press",s:4},{n:"Incline Press",s:3},{n:"Pec Dec",s:3},
+      {n:"Bent Over Row",s:4},{n:"Lat Pulldown",s:3},{n:"Seated Cable Row",s:3},
+      {n:"Ab Crunch",s:3,opt:true}
+    ]},
+    shoulders_arms_2:{name:"SHOULDERS + ARMS",sub:"DELTS · BICEPS · TRICEPS",ex:[
+      {n:"Overhead Press",s:4},{n:"Lateral Raise",s:3},{n:"Rear Delt Fly",s:3},
+      {n:"Barbell Curl",s:3},{n:"Incline Curl",s:3},
+      {n:"Tricep Pushdown",s:3},{n:"Skull Crushers",s:3}
+    ]},
+    legs_2:{name:"LEGS",sub:"QUADS · HAMS · CALVES",ex:[
+      {n:"Squat",s:4},{n:"Leg Press",s:3},{n:"Leg Extension",s:3},
+      {n:"Leg Curl",s:3},{n:"Standing Calf Raise",s:4},{n:"Seated Calf Raise",s:3}
     ]}
   };
-  var ORDER=["upper1","lower1","upper2","lower2"];
+  var ORDER=["chest_back_1","shoulders_arms_1","legs_1","chest_back_2","shoulders_arms_2","legs_2"];
   var SESSION=60*60;
 
   /* ── PERSISTENCE ── */
