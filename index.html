@@ -28,6 +28,7 @@
     padding-top:env(safe-area-inset-top);
     position:relative;
   }
+  /* CRT scanlines */
   body::after{
     content:'';position:fixed;top:0;left:0;right:0;bottom:0;
     background:repeating-linear-gradient(
@@ -39,7 +40,9 @@
   button{font-family:'VT323','Courier New',monospace;color:inherit;border:none;background:none;cursor:pointer}
   :focus-visible{outline:1px solid var(--ph-bright)}
 
+  /* ══ HOME ══ */
   .home{padding-top:30px}
+
   .brand{
     border:1px solid var(--ph-dim);padding:18px 16px 14px;
     margin-bottom:20px;background:var(--surface);
@@ -57,8 +60,10 @@
   }
   .brand-ver{display:block;font-size:17px;letter-spacing:3px;color:var(--ph-dim);margin-top:4px}
   .brand-sub{display:block;font-size:17px;letter-spacing:2px;color:var(--ph-dim);margin-top:1px}
+
   .sec-lbl{font-size:18px;letter-spacing:3px;color:var(--ph-dim);text-transform:uppercase;margin-bottom:8px}
   .sec-lbl::before{content:'► '}
+
   .days{display:grid;gap:8px}
   .day-card{
     display:block;width:100%;background:var(--surface);
@@ -81,8 +86,10 @@
   .day-pfill{height:100%;background:var(--ph-dim);transition:width .3s}
   .day-card.complete .day-pfill{background:var(--green)}
   .day-ptxt{font-size:17px;color:var(--ph-dim);min-width:52px;text-align:right;letter-spacing:1px}
+
   .home-foot{text-align:center;color:var(--ph-dim);font-size:16px;margin-top:22px;letter-spacing:1px}
 
+  /* ══ DAY VIEW ══ */
   .view-day{display:none}
   body.in-day .home{display:none}
   body.in-day .view-day{display:block}
@@ -97,6 +104,7 @@
   .day-title{font-size:22px;text-transform:uppercase;letter-spacing:3px;color:var(--ph-bright);text-shadow:0 0 8px var(--ph)}
   .set-count{font-size:20px;color:var(--ph-dim);letter-spacing:1px}
   .set-count b{color:var(--green-b)}
+
   .scoreboard{background:var(--surface);border:1px solid var(--line);padding:12px 14px}
   .sb-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .clock-lbl{display:block;font-size:14px;color:var(--ph-dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:2px}
@@ -123,6 +131,7 @@
   .bar > i{display:block;height:100%;width:0%;background:var(--ph-dim);transition:width 1s linear}
   .bar.over > i{background:var(--red)}
   .bar-pct{min-width:38px;text-align:right}
+
   .rest-strip{
     display:flex;align-items:center;gap:8px;
     margin-top:8px;background:var(--surface);border:1px solid var(--line);padding:9px 12px;
@@ -140,7 +149,9 @@
   .preset:active{background:var(--line)}
   .skip-btn{font-size:17px;color:var(--teal-b);padding:6px 8px;text-transform:uppercase;letter-spacing:1px}
 
+  /* ══ EXERCISE LIST ══ */
   .list{margin-top:12px;display:grid;gap:6px}
+
   @keyframes wiggle{
     0%,100%{transform:rotate(0deg) translateX(0)}
     20%{transform:rotate(-1.5deg) translateX(-1px)}
@@ -151,6 +162,7 @@
   .list.editing-mode .ex:nth-child(2n){animation-delay:.07s;animation-direction:alternate}
   .list.editing-mode .ex:nth-child(3n){animation-delay:.14s}
   .list.editing-mode .ex:nth-child(4n){animation-delay:.04s;animation-direction:alternate-reverse}
+
   .ex{background:var(--surface);border:1px solid var(--line);overflow:hidden}
   .ex.done{border-color:var(--green)}
   .ex-top{display:flex;align-items:center;width:100%}
@@ -168,6 +180,7 @@
   .ex.done .ex-count{color:var(--green-b)}
   .ex-chev{font-size:18px;color:var(--ph-dim);transition:transform .15s}
   .ex.open .ex-chev{transform:rotate(90deg)}
+
   .minus-btn{
     flex-shrink:0;width:28px;height:28px;
     background:var(--red);color:#fff;font-size:22px;
@@ -175,8 +188,10 @@
     margin-left:10px;line-height:1;padding-bottom:1px;cursor:pointer;
   }
   .minus-btn:active{background:var(--red-b)}
+
   .ex-body{display:none;padding:0 14px 12px;gap:6px;grid-template-columns:repeat(3,1fr)}
   .ex.open .ex-body{display:grid}
+
   .set{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:2px;padding:13px 6px;
@@ -189,6 +204,8 @@
   .set.done{background:rgba(42,107,26,.2);border-color:var(--green)}
   .set.done .s-mark{color:var(--green-b)}
   .set.done .s-lbl{color:var(--green)}
+
+  /* notes */
   .note-wrap{grid-column:1/-1}
   .note-input{
     width:100%;background:var(--bg);border:none;border-top:1px solid var(--line);
@@ -197,6 +214,7 @@
   }
   .note-input::placeholder{color:var(--line)}
   .note-input:focus{outline:none;color:var(--ph)}
+
   .plus-btn{
     width:100%;padding:14px;background:transparent;
     border:1px dashed var(--ph-dim);color:var(--ph-dim);
@@ -204,6 +222,7 @@
     text-transform:uppercase;cursor:pointer;
   }
   .plus-btn:active{border-color:var(--ph);color:var(--ph)}
+
   .action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
   .edit-btn{
     padding:14px 10px;background:transparent;border:1px solid var(--ph-dim);
@@ -218,25 +237,31 @@
     letter-spacing:2px;text-transform:uppercase;cursor:pointer;
   }
   .clear-btn:active{border-color:var(--red-b);color:var(--red-b)}
+
   .view-foot{text-align:center;color:var(--ph-dim);font-size:15px;margin-top:20px;letter-spacing:1px}
+
   @media(prefers-reduced-motion:reduce){
     *,.list.editing-mode .ex{animation:none !important;transition:none !important}
   }
 </style>
 </head>
 <body>
+
+<!-- HOME -->
 <section class="home">
   <div class="brand">
     <span class="bc bc-tl"></span><span class="bc bc-tr"></span>
     <span class="bc bc-bl"></span><span class="bc bc-br"></span>
     <span class="brand-title">LIFT CONSOLE</span>
     <span class="brand-ver">// TRAINING LOG v2.0</span>
-    <span class="brand-sub">UPPER / LOWER SPLIT PROGRAM</span>
+    <span class="brand-sub">ARNOLD SPLIT · 6 DAY PROGRAM</span>
   </div>
   <p class="sec-lbl">Select session</p>
   <div class="days" id="days"></div>
   <p class="home-foot">// PROGRESS SAVES TO DEVICE</p>
 </section>
+
+<!-- DAY VIEW -->
 <section class="view-day">
   <div class="console">
     <div class="topbar">
@@ -244,6 +269,7 @@
       <span class="day-title" id="dayTitle"></span>
       <span class="set-count"><b id="setsDone">0</b>/<span id="setsTotal">0</span></span>
     </div>
+
     <div class="scoreboard">
       <div class="sb-row">
         <div>
@@ -260,6 +286,7 @@
         <span class="bar-pct" id="barPct">0%</span>
       </div>
     </div>
+
     <div class="rest-strip" id="restWrap">
       <div>
         <span class="rest-lbl">// REST</span>
@@ -274,6 +301,7 @@
       <button class="skip-btn" id="skipRest">SKIP</button>
     </div>
   </div>
+
   <div class="list" id="list"></div>
   <div class="action-row">
     <button class="edit-btn" id="editBtn">[E] EDIT</button>
@@ -281,93 +309,178 @@
   </div>
   <p class="view-foot">// TAP EXERCISE TO EXPAND · SET CHECK STARTS REST</p>
 </section>
+
 <script>
 (function(){
   "use strict";
-  var WORKOUTS={
-    upper1:{name:"UPPER 1",sub:"PUSH · PULL · ARMS",ex:[
-      {n:"Shoulder Press",s:3},{n:"Lower Lat Row",s:3},{n:"Machine Row",s:2},
-      {n:"Pec Dec",s:3},{n:"Rear Delt Fly",s:3},{n:"Skull Crushers",s:3},
-      {n:"Overhead Extension",s:3},{n:"Bicep Curl",s:3},{n:"Preacher Curl",s:3},
+
+  /* ── DATA ── */
+  var WORKOUTS = {
+    chest_back_1:{name:"CHEST + BACK",sub:"PUSH · PULL",ex:[
+      {n:"Bench Press",s:4},{n:"Incline Press",s:3},{n:"Pec Dec",s:3},
+      {n:"Bent Over Row",s:4},{n:"Lat Pulldown",s:3},{n:"Seated Cable Row",s:3},
       {n:"Ab Crunch",s:3,opt:true}
     ]},
-    lower1:{name:"LOWER 1",sub:"POSTERIOR · GLUTES",ex:[
-      {n:"Smith Split Squat",s:3},{n:"SLDL",s:3},{n:"Hip Thrust",s:3},
-      {n:"Hamstring Curl",s:3},{n:"Standing Calf Raise",s:3},{n:"Ab Crunch",s:3,opt:true}
+    shoulders_arms_1:{name:"SHOULDERS + ARMS",sub:"DELTS · BICEPS · TRICEPS",ex:[
+      {n:"Overhead Press",s:4},{n:"Lateral Raise",s:3},{n:"Rear Delt Fly",s:3},
+      {n:"Barbell Curl",s:3},{n:"Incline Curl",s:3},
+      {n:"Tricep Pushdown",s:3},{n:"Skull Crushers",s:3}
     ]},
-    upper2:{name:"UPPER 2",sub:"PUSH · PULL · ARMS",ex:[
-      {n:"Flat Chest Press",s:3},{n:"Incline Press",s:3},{n:"Lat Pulldown",s:3},
-      {n:"Machine Row",s:2},{n:"Lat Raise",s:3},{n:"Tricep Pushdown",s:3},
-      {n:"Overhead Cable Ext",s:3},{n:"Bicep Curl",s:3},{n:"Machine Curl",s:3}
+    legs_1:{name:"LEGS",sub:"QUADS · HAMS · CALVES",ex:[
+      {n:"Squat",s:4},{n:"Leg Press",s:3},{n:"Leg Extension",s:3},
+      {n:"Leg Curl",s:3},{n:"Standing Calf Raise",s:4},{n:"Seated Calf Raise",s:3}
     ]},
-    lower2:{name:"LOWER 2",sub:"QUADS · ACCESSORIES",ex:[
-      {n:"Leg Press",s:3},{n:"Leg Extension",s:3},{n:"Seated Leg Curl",s:3},
-      {n:"Abductors",s:3},{n:"Adductors",s:3},{n:"Calf Raises",s:3}
+    chest_back_2:{name:"CHEST + BACK",sub:"PUSH · PULL",ex:[
+      {n:"Bench Press",s:4},{n:"Incline Press",s:3},{n:"Pec Dec",s:3},
+      {n:"Bent Over Row",s:4},{n:"Lat Pulldown",s:3},{n:"Seated Cable Row",s:3},
+      {n:"Ab Crunch",s:3,opt:true}
+    ]},
+    shoulders_arms_2:{name:"SHOULDERS + ARMS",sub:"DELTS · BICEPS · TRICEPS",ex:[
+      {n:"Overhead Press",s:4},{n:"Lateral Raise",s:3},{n:"Rear Delt Fly",s:3},
+      {n:"Barbell Curl",s:3},{n:"Incline Curl",s:3},
+      {n:"Tricep Pushdown",s:3},{n:"Skull Crushers",s:3}
+    ]},
+    legs_2:{name:"LEGS",sub:"QUADS · HAMS · CALVES",ex:[
+      {n:"Squat",s:4},{n:"Leg Press",s:3},{n:"Leg Extension",s:3},
+      {n:"Leg Curl",s:3},{n:"Standing Calf Raise",s:4},{n:"Seated Calf Raise",s:3}
     ]}
   };
-  var ORDER=["upper1","lower1","upper2","lower2"];
+  var ORDER=["chest_back_1","shoulders_arms_1","legs_1","chest_back_2","shoulders_arms_2","legs_2"];
   var SESSION=60*60;
+
+  /* ── PERSISTENCE ── */
   var mem={};
   function load(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return(k in mem)?mem[k]:d;}}
   function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){mem[k]=v;}}
   function remove(k){try{localStorage.removeItem(k);}catch(e){delete mem[k];}}
-  var progress=load("lc_progress",{});
-  var notes=load("lc_notes",{});
-  var customEx=load("lc_exercises",{});
+
+  var progress =load("lc_progress",{});
+  var notes    =load("lc_notes",{});
+  var customEx =load("lc_exercises",{});
   var restPreset=load("lc_rest",90);
-  function getEx(day){return(customEx[day]&&customEx[day].length>0)?customEx[day]:WORKOUTS[day].ex.map(function(e){return{n:e.n,s:e.s,opt:e.opt||false};});}
+
+  /* ── CUSTOM EXERCISES ── */
+  function getEx(day){
+    return(customEx[day]&&customEx[day].length>0)
+      ?customEx[day]
+      :WORKOUTS[day].ex.map(function(e){return{n:e.n,s:e.s,opt:e.opt||false};});
+  }
   function saveEx(day,arr){customEx[day]=arr;save("lc_exercises",customEx);}
+
   function dayState(day){
     var list=getEx(day);
-    if(!progress[day]){progress[day]=list.map(function(e){return new Array(e.s).fill(false);});}
-    else{
-      while(progress[day].length<list.length){var ni=progress[day].length;progress[day].push(new Array(list[ni].s).fill(false));}
+    if(!progress[day]){
+      progress[day]=list.map(function(e){return new Array(e.s).fill(false);});
+    } else {
+      while(progress[day].length<list.length){
+        var ni=progress[day].length;
+        progress[day].push(new Array(list[ni].s).fill(false));
+      }
       progress[day]=progress[day].slice(0,list.length);
     }
     return progress[day];
   }
-  function getNote(day,i){return(notes[day]&&notes[day][i]!=null)?notes[day][i]:"";}  
-  function setNote(day,i,text){if(!notes[day])notes[day]={};if(text){notes[day][i]=text;}else{delete notes[day][i];}save("lc_notes",notes);}
+
+  function getNote(day,i){return(notes[day]&&notes[day][i]!=null)?notes[day][i]:"";
+  }
+  function setNote(day,i,text){
+    if(!notes[day])notes[day]={};
+    if(text){notes[day][i]=text;}else{delete notes[day][i];}
+    save("lc_notes",notes);
+  }
+
+  /* ── TIMERS (deadline-based — survives iOS PWA background reload) ── */
   var sess={id:null,endAt:null,pausedRemaining:SESSION,running:false,buzzed:false};
   var rest={id:null,endAt:null,running:false};
+
   function sessRem(){if(sess.running&&sess.endAt)return Math.round((sess.endAt-Date.now())/1000);return sess.pausedRemaining;}
   function restRem(){if(rest.running&&rest.endAt)return Math.max(0,Math.round((rest.endAt-Date.now())/1000));return restPreset;}
+
   function fmt(sec){var neg=sec<0;sec=Math.abs(sec);var m=Math.floor(sec/60),s=sec%60;return(neg?"+":"")+m+":"+(s<10?"0":"")+s;}
+
   function tickSess(){renderSession();if(sessRem()<=0&&!sess.buzzed){sess.buzzed=true;buzz();}}
   function renderSession(){
     var rem=sessRem();
     var c=document.getElementById("clock"),b=document.getElementById("bar"),p=document.getElementById("barPct");
-    c.textContent=fmt(rem);c.classList.toggle("over",rem<0);c.classList.toggle("warn",rem>=0&&rem<=300);
-    var used=SESSION-rem,pct=Math.min(100,Math.max(0,(used/SESSION)*100));
-    b.firstElementChild.style.width=pct+"%";b.classList.toggle("over",rem<0);
+    c.textContent=fmt(rem);
+    c.classList.toggle("over",rem<0);
+    c.classList.toggle("warn",rem>=0&&rem<=300);
+    var used=SESSION-rem, pct=Math.min(100,Math.max(0,(used/SESSION)*100));
+    b.firstElementChild.style.width=pct+"%";
+    b.classList.toggle("over",rem<0);
     if(p)p.textContent=Math.round(pct)+"%";
   }
   function startSession(){
-    if(sess.running){sess.pausedRemaining=sessRem();clearInterval(sess.id);sess.id=null;sess.running=false;sess.endAt=null;saveSess();document.getElementById("startBtn").textContent="RESUME";return;}
+    if(sess.running){
+      sess.pausedRemaining=sessRem();
+      clearInterval(sess.id);sess.id=null;sess.running=false;sess.endAt=null;
+      saveSess();document.getElementById("startBtn").textContent="RESUME";return;
+    }
     sess.endAt=Date.now()+sess.pausedRemaining*1000;sess.running=true;saveSess();
-    document.getElementById("startBtn").textContent="PAUSE";sess.id=setInterval(tickSess,500);
+    document.getElementById("startBtn").textContent="PAUSE";
+    sess.id=setInterval(tickSess,500);
   }
   function resetSession(){
-    clearInterval(sess.id);sess.id=null;sess.running=false;sess.endAt=null;sess.pausedRemaining=SESSION;sess.buzzed=false;
+    clearInterval(sess.id);sess.id=null;
+    sess.running=false;sess.endAt=null;sess.pausedRemaining=SESSION;sess.buzzed=false;
     remove("lc_sess");document.getElementById("startBtn").textContent="START";renderSession();
   }
   function saveSess(){save("lc_sess",{running:sess.running,endAt:sess.endAt,pausedRemaining:sess.pausedRemaining});}
-  function tickRest(){renderRest();if(restRem()<=0){clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;remove("lc_rest_end");buzz();setTimeout(renderRest,900);}}
-  function renderRest(){var rem=rest.running?restRem():restPreset;document.getElementById("restClock").textContent=fmt(rem);document.getElementById("restWrap").classList.toggle("active",rest.running);}
-  function startRest(){clearInterval(rest.id);rest.endAt=Date.now()+restPreset*1000;rest.running=true;save("lc_rest_end",rest.endAt);renderRest();rest.id=setInterval(tickRest,500);}
-  function skipRest(){clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;remove("lc_rest_end");renderRest();}
+
+  function tickRest(){
+    renderRest();
+    if(restRem()<=0){
+      clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;
+      remove("lc_rest_end");buzz();setTimeout(renderRest,900);
+    }
+  }
+  function renderRest(){
+    var rem=rest.running?restRem():restPreset;
+    document.getElementById("restClock").textContent=fmt(rem);
+    document.getElementById("restWrap").classList.toggle("active",rest.running);
+  }
+  function startRest(){
+    clearInterval(rest.id);
+    rest.endAt=Date.now()+restPreset*1000;rest.running=true;
+    save("lc_rest_end",rest.endAt);renderRest();
+    rest.id=setInterval(tickRest,500);
+  }
+  function skipRest(){
+    clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;
+    remove("lc_rest_end");renderRest();
+  }
+
   function buzz(){
     if(navigator.vibrate){try{navigator.vibrate([220,90,220]);}catch(e){}}
-    try{var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;var ac=new Ctx(),o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type="sine";o.frequency.value=880;g.gain.setValueAtTime(.001,ac.currentTime);g.gain.exponentialRampToValueAtTime(.4,ac.currentTime+.02);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.5);o.start();o.stop(ac.currentTime+.5);}catch(e){}
+    try{
+      var Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+      var ac=new Ctx(),o=ac.createOscillator(),g=ac.createGain();
+      o.connect(g);g.connect(ac.destination);o.type="sine";o.frequency.value=880;
+      g.gain.setValueAtTime(.001,ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(.4,ac.currentTime+.02);
+      g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.5);
+      o.start();o.stop(ac.currentTime+.5);
+    }catch(e){}
   }
-  function dayCounts(day){var list=getEx(day),st=dayState(day),done=0,total=0;list.forEach(function(e,i){var arr=st[i]||[];arr.forEach(function(b){total++;if(b)done++;});});return{done:done,total:total};}
+
+  /* ── HOME ── */
+  function dayCounts(day){
+    var list=getEx(day),st=dayState(day),done=0,total=0;
+    list.forEach(function(e,i){var arr=st[i]||[];arr.forEach(function(b){total++;if(b)done++;});});
+    return{done:done,total:total};
+  }
+
   function renderHome(){
     var wrap=document.getElementById("days");wrap.innerHTML="";
     ORDER.forEach(function(day,idx){
       var w=WORKOUTS[day],c=dayCounts(day);
       var complete=c.done===c.total&&c.total>0;
       var pct=c.total>0?Math.round((c.done/c.total)*100):0;
-      var btn=document.createElement("button");btn.className="day-card"+(complete?" complete":"");
+
+      var btn=document.createElement("button");
+      btn.className="day-card"+(complete?" complete":"");
+
+      // header row
       var row=document.createElement("div");row.className="day-card-row";
       var num=document.createElement("span");num.className="day-num";num.textContent=(idx+1<10?"0"+(idx+1):""+(idx+1));
       var info=document.createElement("div");info.className="day-info";
@@ -376,32 +489,45 @@
       info.appendChild(nm);info.appendChild(sub);
       var arr=document.createElement("span");arr.className="day-arr";arr.textContent=complete?"[OK]":"›";
       row.appendChild(num);row.appendChild(info);row.appendChild(arr);
+
+      // progress row
       var pr=document.createElement("div");pr.className="day-prog-row";
       var pb=document.createElement("div");pb.className="day-pbar";
       var pf=document.createElement("div");pf.className="day-pfill";pf.style.width=pct+"%";
       pb.appendChild(pf);
       var pt=document.createElement("span");pt.className="day-ptxt";pt.textContent=c.done+"/"+c.total;
       pr.appendChild(pb);pr.appendChild(pt);
+
       btn.appendChild(row);btn.appendChild(pr);
-      btn.addEventListener("click",function(){openDay(day);});wrap.appendChild(btn);
+      btn.addEventListener("click",function(){openDay(day);});
+      wrap.appendChild(btn);
     });
   }
+
+  /* ── DAY VIEW ── */
   var current=null,editing=false;
+
   function setCounts(){var c=dayCounts(current);document.getElementById("setsDone").textContent=c.done;document.getElementById("setsTotal").textContent=c.total;}
+
   function renderList(){
     var list=document.getElementById("list");list.innerHTML="";
     list.classList.toggle("editing-mode",editing);
     var st=dayState(current),defs=getEx(current);
+
     defs.forEach(function(e,i){
       var arr=st[i]||[],done=arr.filter(Boolean).length;
       var ex=document.createElement("div");ex.className="ex"+(done===e.s?" done":"");
+
+      // row: minus (edit) + head button as siblings, never nested
       var top=document.createElement("div");top.className="ex-top";
+
       if(editing){
         var mb=document.createElement("button");mb.className="minus-btn";mb.textContent="−";
         mb.setAttribute("aria-label","Remove "+e.n);
         (function(xi){mb.addEventListener("click",function(ev){ev.stopPropagation();removeEx(xi);});})(i);
         top.appendChild(mb);
       }
+
       var head=document.createElement("button");head.className="ex-head";head.setAttribute("aria-expanded","false");
       var numSp=document.createElement("span");numSp.className="ex-num";numSp.textContent=(i+1<10?"0"+(i+1):""+(i+1));
       var nameSp=document.createElement("span");nameSp.className="ex-name";nameSp.textContent=e.n;
@@ -409,8 +535,13 @@
       var countSp=document.createElement("span");countSp.className="ex-count";countSp.textContent=done+"/"+e.s;
       var chevSp=document.createElement("span");chevSp.className="ex-chev";chevSp.textContent="›";
       head.appendChild(numSp);head.appendChild(nameSp);head.appendChild(countSp);head.appendChild(chevSp);
-      head.addEventListener("click",function(){if(editing)return;var open=ex.classList.toggle("open");head.setAttribute("aria-expanded",open?"true":"false");});
+      head.addEventListener("click",function(){
+        if(editing)return;
+        var open=ex.classList.toggle("open");
+        head.setAttribute("aria-expanded",open?"true":"false");
+      });
       top.appendChild(head);
+
       var body=document.createElement("div");body.className="ex-body";
       for(var s=0;s<e.s;s++){
         (function(si){
@@ -420,51 +551,79 @@
           btn.appendChild(lbl);btn.appendChild(mark);
           btn.addEventListener("click",function(){
             arr[si]=!arr[si];save("lc_progress",progress);
-            btn.classList.toggle("done",arr[si]);mark.textContent=arr[si]?"[✓]":"[ ]";
-            var nd=arr.filter(Boolean).length;countSp.textContent=nd+"/"+e.s;
-            ex.classList.toggle("done",nd===e.s);setCounts();if(arr[si])startRest();
+            btn.classList.toggle("done",arr[si]);
+            mark.textContent=arr[si]?"[✓]":"[ ]";
+            var nd=arr.filter(Boolean).length;
+            countSp.textContent=nd+"/"+e.s;
+            ex.classList.toggle("done",nd===e.s);
+            setCounts();if(arr[si])startRest();
           });
           body.appendChild(btn);
         })(s);
       }
+
+      // notes
       (function(xi){
         var nw=document.createElement("div");nw.className="note-wrap";
-        var ta=document.createElement("textarea");ta.className="note-input";ta.placeholder="// NOTES...";ta.rows=2;
+        var ta=document.createElement("textarea");
+        ta.className="note-input";ta.placeholder="// NOTES...";ta.rows=2;
         ta.value=getNote(current,xi);
         ta.addEventListener("input",function(){setNote(current,xi,ta.value);});
         ta.addEventListener("click",function(ev){ev.stopPropagation();});
         nw.appendChild(ta);body.appendChild(nw);
       })(i);
-      ex.appendChild(top);ex.appendChild(body);list.appendChild(ex);
+
+      ex.appendChild(top);ex.appendChild(body);
+      list.appendChild(ex);
     });
+
     if(editing){
       var pb=document.createElement("button");pb.className="plus-btn";pb.textContent="[+] ADD EXERCISE";
-      pb.addEventListener("click",addEx);list.appendChild(pb);
+      pb.addEventListener("click",addEx);
+      list.appendChild(pb);
     }
   }
+
   function removeEx(idx){
     var list=getEx(current).slice();list.splice(idx,1);saveEx(current,list);
     if(progress[current]){progress[current].splice(idx,1);save("lc_progress",progress);}
     if(notes[current]){
-      var nn={};Object.keys(notes[current]).forEach(function(k){var ki=parseInt(k,10);if(ki<idx)nn[k]=notes[current][k];else if(ki>idx)nn[String(ki-1)]=notes[current][k];});
+      var nn={};
+      Object.keys(notes[current]).forEach(function(k){
+        var ki=parseInt(k,10);
+        if(ki<idx)nn[k]=notes[current][k];
+        else if(ki>idx)nn[String(ki-1)]=notes[current][k];
+      });
       notes[current]=nn;save("lc_notes",notes);
     }
     renderList();setCounts();
   }
+
   function addEx(){
-    var name=prompt("EXERCISE NAME:");if(!name||!name.trim())return;
-    var ss=prompt("NUMBER OF SETS:","3");var sets=parseInt(ss,10);if(isNaN(sets)||sets<1)sets=3;
-    var list=getEx(current).slice();list.push({n:name.trim(),s:sets,opt:false});saveEx(current,list);
-    if(!progress[current])progress[current]=[];progress[current].push(new Array(sets).fill(false));save("lc_progress",progress);
+    var name=prompt("EXERCISE NAME:");
+    if(!name||!name.trim())return;
+    var ss=prompt("NUMBER OF SETS:","3");
+    var sets=parseInt(ss,10);if(isNaN(sets)||sets<1)sets=3;
+    var list=getEx(current).slice();
+    list.push({n:name.trim(),s:sets,opt:false});
+    saveEx(current,list);
+    if(!progress[current])progress[current]=[];
+    progress[current].push(new Array(sets).fill(false));
+    save("lc_progress",progress);
     renderList();setCounts();
   }
+
   function toggleEdit(){
     editing=!editing;
     var btn=document.getElementById("editBtn");
-    btn.textContent=editing?"[X] DONE":"[E] EDIT";btn.classList.toggle("active",editing);renderList();
+    btn.textContent=editing?"[X] DONE":"[E] EDIT";
+    btn.classList.toggle("active",editing);
+    renderList();
   }
+
   function openDay(day,keepTimers){
-    current=day;editing=false;save("lc_current",day);
+    current=day;editing=false;
+    save("lc_current",day);
     document.body.classList.add("in-day");
     document.getElementById("dayTitle").textContent=WORKOUTS[day].name;
     document.getElementById("editBtn").textContent="[E] EDIT";
@@ -472,6 +631,7 @@
     if(!keepTimers){resetSession();skipRest();}
     renderList();setCounts();window.scrollTo(0,0);
   }
+
   function goHome(){
     editing=false;document.body.classList.remove("in-day");
     clearInterval(sess.id);sess.id=null;sess.running=false;
@@ -479,12 +639,15 @@
     remove("lc_current");remove("lc_sess");remove("lc_rest_end");
     current=null;renderHome();
   }
+
   function clearDay(){
     if(!current)return;
     if(!confirm("CLEAR ALL SETS FOR "+WORKOUTS[current].name+"?"))return;
     progress[current]=getEx(current).map(function(e){return new Array(e.s).fill(false);});
     save("lc_progress",progress);resetSession();skipRest();renderList();setCounts();
   }
+
+  /* ── WIRE UP ── */
   document.getElementById("startBtn").addEventListener("click",startSession);
   document.getElementById("resetBtn").addEventListener("click",resetSession);
   document.getElementById("back").addEventListener("click",goHome);
@@ -497,23 +660,51 @@
     document.querySelectorAll(".preset").forEach(function(p){p.classList.toggle("sel",p===b);});
     if(!rest.running)renderRest();
   });
+
+  /* ── RESTORE ON LOAD (iOS PWA reload after background) ── */
   var savedCurrent=load("lc_current",null);
-  var savedSess=load("lc_sess",null);
+  var savedSess   =load("lc_sess",null);
   var savedRestEnd=load("lc_rest_end",null);
-  document.querySelectorAll(".preset").forEach(function(p){p.classList.toggle("sel",parseInt(p.dataset.sec,10)===restPreset);});
+
+  document.querySelectorAll(".preset").forEach(function(p){
+    p.classList.toggle("sel",parseInt(p.dataset.sec,10)===restPreset);
+  });
+
   if(savedCurrent&&WORKOUTS[savedCurrent]){
     openDay(savedCurrent,true);
     if(savedSess){
-      if(savedSess.running&&savedSess.endAt){sess.endAt=savedSess.endAt;sess.pausedRemaining=Math.round((savedSess.endAt-Date.now())/1000);sess.buzzed=sess.pausedRemaining<=0;sess.running=true;document.getElementById("startBtn").textContent="PAUSE";sess.id=setInterval(tickSess,500);}
-      else if(savedSess.pausedRemaining!=null){sess.pausedRemaining=savedSess.pausedRemaining;if(savedSess.pausedRemaining<SESSION)document.getElementById("startBtn").textContent="RESUME";}
+      if(savedSess.running&&savedSess.endAt){
+        sess.endAt=savedSess.endAt;
+        sess.pausedRemaining=Math.round((savedSess.endAt-Date.now())/1000);
+        sess.buzzed=sess.pausedRemaining<=0;sess.running=true;
+        document.getElementById("startBtn").textContent="PAUSE";
+        sess.id=setInterval(tickSess,500);
+      } else if(savedSess.pausedRemaining!=null){
+        sess.pausedRemaining=savedSess.pausedRemaining;
+        if(savedSess.pausedRemaining<SESSION)document.getElementById("startBtn").textContent="RESUME";
+      }
     }
     renderSession();
-    if(savedRestEnd){var rl=Math.round((savedRestEnd-Date.now())/1000);if(rl>0){rest.endAt=savedRestEnd;rest.running=true;rest.id=setInterval(tickRest,500);}else remove("lc_rest_end");}
+    if(savedRestEnd){
+      var rl=Math.round((savedRestEnd-Date.now())/1000);
+      if(rl>0){rest.endAt=savedRestEnd;rest.running=true;rest.id=setInterval(tickRest,500);}
+      else remove("lc_rest_end");
+    }
     renderRest();
-  } else {renderRest();renderHome();}
+  } else {
+    renderRest();renderHome();
+  }
+
   document.addEventListener("visibilitychange",function(){
-    if(!document.hidden){renderSession();if(rest.running&&restRem()<=0){clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;remove("lc_rest_end");}renderRest();}
+    if(!document.hidden){
+      renderSession();
+      if(rest.running&&restRem()<=0){
+        clearInterval(rest.id);rest.id=null;rest.running=false;rest.endAt=null;remove("lc_rest_end");
+      }
+      renderRest();
+    }
   });
+
 })();
 </script>
 </body>
